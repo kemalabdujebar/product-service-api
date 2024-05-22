@@ -3,36 +3,61 @@ package com.kemal.productserviceapi.Controller;
 import com.kemal.productserviceapi.Model.Product;
 import com.kemal.productserviceapi.Service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
+@RequestMapping("/api/products")
 public class ProductController {
 
 
     @Autowired
     private ProductService productService;
 
-
-
-    //types of http methods GET, POST, DELETE, PUT
-    //PathVariable /product/{productId}
-    @RequestMapping(value = "/product/{productId}", method = RequestMethod.GET)
-    public Product getProduct(@PathVariable Integer productId){
-
-        Product product =  productService.getProduct(productId);
-        product.setProductName("Produce from path variable");
-        return product;
-
-
+    @GetMapping
+    public List<Product> getAllProducts() {
+        return productService.findAll();
     }
 
-    //RequestParam /product?productId=12
-    @GetMapping("/product")
-    public Product getProductSample2(@RequestParam Integer productId){
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+        Optional<Product> product = productService.findById(id);
+        if (product.isPresent()) {
+            return ResponseEntity.ok(product.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-        Product product =  productService.getProduct(productId);
-        product.setProductName("Produce from Request param");
-        return product;
+    @PostMapping
+    public Product createProduct(@RequestBody Product product) {
+        return productService.save(product);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
+        Optional<Product> product = productService.findById(id);
+        if (product.isPresent()) {
+            Product existingProduct = product.get();
+            existingProduct.setProductName(productDetails.getProductName());
+            existingProduct.setPrice(productDetails.getPrice());
+            return ResponseEntity.ok(productService.save(existingProduct));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        Optional<Product> product = productService.findById(id);
+        if (product.isPresent()) {
+            productService.delete(product.get());
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
-
