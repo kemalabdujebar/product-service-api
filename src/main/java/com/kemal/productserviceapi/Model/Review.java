@@ -1,6 +1,13 @@
 package com.kemal.productserviceapi.Model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+@Entity(name = "Review_table")
 public class Review {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int productId;
     private int reviewId;
     private String author;
